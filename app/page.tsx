@@ -1,101 +1,162 @@
-import Image from "next/image";
+'use client'
+
+import { ThemeToggle } from '@/components/theme-toggle'
+import { Button } from '@/components/ui/button'
+import { motion } from 'framer-motion'
+import Link from 'next/link'
+import { Stethoscope, Heart, Brain, Pill, Activity } from 'lucide-react'
+import { useEffect, useRef, useState } from 'react'
 
 export default function Home() {
-  return (
-    <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
-      <main className="flex flex-col gap-8 row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="list-inside list-decimal text-sm text-center sm:text-left font-[family-name:var(--font-geist-mono)]">
-          <li className="mb-2">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] px-1 py-0.5 rounded font-semibold">
-              app/page.tsx
-            </code>
-            .
-          </li>
-          <li>Save and see your changes instantly.</li>
-        </ol>
+  const fadeInUp = {
+    initial: { opacity: 0, y: 20 },
+    animate: { opacity: 1, y: 0 },
+    transition: { duration: 0.6 }
+  }
 
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
+  const staggerChildren = {
+    animate: {
+      transition: {
+        staggerChildren: 0.1
+      }
+    }
+  }
+
+  const pulse = {
+    animate: {
+      scale: [1, 1.05, 1],
+      transition: {
+        duration: 2,
+        repeat: Infinity,
+        repeatType: "reverse" as const
+      }
+    }
+  }
+
+  const [bannerWidth, setBannerWidth] = useState(0)
+  const bannerRef = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    if (bannerRef.current) {
+      setBannerWidth(bannerRef.current.scrollWidth)
+    }
+  }, [])
+
+  return (
+    <div className="flex flex-col items-center justify-center min-h-screen p-4 bg-background text-foreground overflow-hidden">
+      <motion.div
+        initial={{ opacity: 0, y: -50 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.8, ease: "easeOut" }}
+        className="text-center"
+      >
+        <motion.div
+          className="flex items-center justify-center mb-6"
+          {...pulse}
+        >
+          <Stethoscope className="w-16 h-16 text-primary" />
+        </motion.div>
+        <motion.h1 
+          className="text-5xl font-bold mb-6"
+          initial={{ scale: 0.5, opacity: 0 }}
+          animate={{ scale: 1, opacity: 1 }}
+          transition={{ duration: 0.5, delay: 0.2 }}
+        >
+          Welcome to MediChat AI
+        </motion.h1>
+        <motion.p 
+          className="text-xl mb-8 text-muted-foreground"
+          {...fadeInUp}
+        >
+          Get instant medical advice from our AI assistant
+        </motion.p>
+        <motion.div
+          whileHover={{ scale: 1.05 }}
+          whileTap={{ scale: 0.95 }}
+        >
+          <Button asChild size="lg" className="text-lg px-8 py-6">
+            <Link href="/chat">Start Your Consultation</Link>
+          </Button>
+        </motion.div>
+      </motion.div>
+
+      <motion.div 
+        className="grid grid-cols-2 md:grid-cols-4 gap-8 mt-16"
+        variants={staggerChildren}
+        initial="initial"
+        animate="animate"
+      >
+        {[
+          { Icon: Heart, text: "Cardiology" },
+          { Icon: Brain, text: "Neurology" },
+          { Icon: Pill, text: "Pharmacy" },
+          { Icon: Activity, text: "General Health" },
+        ].map(({ Icon, text }, index) => (
+          <motion.div
+            key={index}
+            className="flex flex-col items-center"
+            variants={fadeInUp}
           >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:min-w-44"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
+            <div className="bg-primary/10 text-primary p-4 rounded-full mb-2">
+              <Icon className="w-8 h-8" />
+            </div>
+            <span className="text-sm font-medium">{text}</span>
+          </motion.div>
+        ))}
+      </motion.div>
+
+      <div className="absolute bottom-0 left-0 w-full overflow-hidden bg-primary/10 py-2">
+        <div 
+          ref={bannerRef}
+          className="whitespace-nowrap"
+        >
+          <motion.div
+            className="inline-block"
+            animate={{
+              x: [-bannerWidth, 0],
+            }}
+            transition={{
+              x: {
+                repeat: Infinity,
+                repeatType: "loop",
+                duration: 20,
+                ease: "linear",
+              },
+            }}
           >
-            Read our docs
-          </a>
+            <span className="text-sm text-primary-foreground">
+              MediChat AI provides general information. Always consult with a qualified healthcare professional for medical advice.
+            </span>
+          </motion.div>
+          <motion.div
+            className="inline-block"
+            animate={{
+              x: [-bannerWidth, 0],
+            }}
+            transition={{
+              x: {
+                repeat: Infinity,
+                repeatType: "loop",
+                duration: 20,
+                ease: "linear",
+              },
+            }}
+          >
+            <span className="text-sm text-muted-foreground">
+              MediChat AI provides general information. Always consult with a qualified healthcare professional for medical advice.
+            </span>
+          </motion.div>
         </div>
-      </main>
-      <footer className="row-start-3 flex gap-6 flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
+      </div>
+
+      <motion.div 
+        className="absolute top-4 right-4"
+        initial={{ opacity: 0, x: 20 }}
+        animate={{ opacity: 1, x: 0 }}
+        transition={{ delay: 0.5, duration: 0.5 }}
+      >
+        <ThemeToggle />
+      </motion.div>
     </div>
-  );
+  )
 }
